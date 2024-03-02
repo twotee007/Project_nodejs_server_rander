@@ -17,18 +17,18 @@ router.get("/", (req, res) => {
     });
   });
 
-router.post("/update",(req,res)=>{
+router.post("/insertimg",(req,res)=>{
      let imgtovotes : imgvote = req.body;
-     let sql = "INSERT INTO `vote`(`userid`, `imgid`, `score`,`isWinner`,`vateDate`) VALUES (?,?,?,?,?)";
+     let sql = "INSERT INTO `vote`(`userid`, `imgid`, `score`,`isWinner`) VALUES (?,?,?,?)";
      sql = mysql.format(sql,[
         imgtovotes.userid,
         imgtovotes.imgid,
-        imgtovotes.socre,
+        imgtovotes.score,
         imgtovotes.isWinner,
-        imgtovotes.voteDate,
     ]);
     conn.query(sql,(err,result)=>{
         if(err)throw err;
         res.status(201).json({affected_row: result.affectedRows });
     });
 });
+
