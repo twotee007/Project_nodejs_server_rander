@@ -1,5 +1,6 @@
 import express from "express";
 import {conn, mysql} from "../dbcon";
+import { imgvote } from "../model/vote_get";
 export const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -15,3 +16,19 @@ router.get("/", (req, res) => {
         }
     });
   });
+
+router.post("/update",(req,res)=>{
+     let imgtovotes : imgvote = req.body;
+     let sql = "INSERT INTO `vote`(`userid`, `imgid`, `score`,`isWinner`,`vateDate`) VALUES (?,?,?,?,?)";
+     sql = mysql.format(sql,[
+        imgtovotes.userid,
+        imgtovotes.imgid,
+        imgtovotes.socre,
+        imgtovotes.isWinner,
+        imgtovotes.voteDate,
+    ]);
+    conn.query(sql,(err,result)=>{
+        if(err)throw err;
+        res.status(201).json({affected_row: result.affectedRows });
+    });
+});
