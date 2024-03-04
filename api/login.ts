@@ -55,11 +55,11 @@ router.get("/:username/:password", (req, res) => {
 
 router.post("/signup",(req,res)=>{
     let signup : SignUpGet = req.body;
-    let sql = "INSERT INTO `user`(`username`, `name`, `image` ,`password`,`type`) VALUES (?,?,?,?,?)";
+    let sql = "INSERT INTO `user`(`username`, `name`,`password`,`type`) VALUES (?,?,?,?)";
     sql = mysql.format(sql,[
         signup.username,
         signup.name,
-        signup.image,
+        // signup.image,
         signup.password,
         signup.type,
     ]);
