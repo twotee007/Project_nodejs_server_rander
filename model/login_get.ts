@@ -3,5 +3,5 @@ export interface SignUpGet {
     name:     string;
     password: string;
     type:     string;
-    image  : string;
+    // image  : string;
 }
