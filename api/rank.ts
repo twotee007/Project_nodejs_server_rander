@@ -88,7 +88,6 @@ router.get("/graph/:uid", (req, res) => {
       ) AS subquery
       GROUP BY imgid
       ORDER BY imgid, MAX(voteDate) DESC
-      LIMIT 0, 25;
     `;
   conn.query(sql, [uid], (err, result, fields) => {
     if (result && result.length > 0) {
