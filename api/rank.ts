@@ -67,8 +67,8 @@ router.get("/graph/:uid", (req, res) => {
   let uid = +req.params.uid;
   const sql = `
   SELECT 
-  GROUP_CONCAT(voteDate ORDER BY voteDate DESC) AS voteDate,
-  GROUP_CONCAT(totalScore ORDER BY voteDate DESC) AS totalScore,
+  GROUP_CONCAT(voteDate ORDER BY voteDate ASC) AS voteDate,
+  GROUP_CONCAT(totalScore ORDER BY voteDate ASC) AS totalScore,
   imgid,
   name,
   imgurl
@@ -87,7 +87,7 @@ router.get("/graph/:uid", (req, res) => {
       GROUP BY DATE(vateDate), vote.imgid
       ) AS subquery
       GROUP BY imgid
-      ORDER BY imgid, MAX(voteDate) DESC
+      ORDER BY imgid, MAX(voteDate) ASC
     `;
   conn.query(sql, [uid], (err, result, fields) => {
     if (result && result.length > 0) {
