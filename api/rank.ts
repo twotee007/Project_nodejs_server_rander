@@ -46,8 +46,6 @@ router.get("/today", (req, res) => {
         vote ON images.imgid = vote.imgid
     GROUP BY 
         images.imgid, images.imgurl, images.name, images.score, images.uid
-    ORDER BY 
-        images.score DESC
     LIMIT 0, 10; `,
     (err, result, fields) => {
       if (result && result.length > 0) {
