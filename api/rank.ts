@@ -6,20 +6,20 @@ export const router = express.Router();
 router.get("/yesterday", (req, res) => {
   conn.query(
     `
-        SELECT  
-            images.*,
-            RANK() OVER (ORDER BY SUM(vote.score) DESC) AS rankingyesterday
-        FROM 
-            images,vote
-        WHERE  
-            images.imgid = vote.imgid
-        AND
-            DATE(vote.vateDate) = CURDATE() - INTERVAL 1 DAY
-        GROUP BY 
-            images.imgid, images.imgurl, images.name, images.score, images.uid
-        ORDER BY 
-            images.score DESC
-        LIMIT 0, 10 `,
+    SELECT  
+        images.*,
+        RANK() OVER (ORDER BY SUM(vote.score) DESC) AS rankingyesterday
+    FROM 
+        images,vote
+    WHERE  
+        images.imgid = vote.imgid
+    AND 
+        DATE(vateDate) < CURDATE()
+    GROUP BY 
+        images.imgid, images.imgurl, images.name, images.score, images.uid
+    ORDER BY 
+        images.score DESC
+    LIMIT 0, 10 `,
     (err, result, fields) => {
       if (result && result.length > 0) {
         // ส่ง response กลับด้วยข้อมูลผู้ใช้
@@ -80,7 +80,6 @@ router.get("/graph/:uid", (req, res) => {
       FROM vote,images
       WHERE vote.imgid = images.imgid
          AND DATE(vateDate) >= CURDATE() - INTERVAL 7 DAY
-      AND DATE(vateDate) < CURDATE()
       AND userid = ?
       GROUP BY DATE(vateDate), vote.imgid
       ) AS subquery
