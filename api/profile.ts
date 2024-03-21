@@ -1,6 +1,6 @@
 import express from "express";
 import {conn, mysql} from "../dbcon";
-import { SignUpGet } from "../model/login_get";
+import { SignUpGet, Uppassword, Upuser } from "../model/login_get";
 import multer from "multer";
 export const router = express.Router();
 
@@ -33,7 +33,7 @@ const firebaseConfig = {
   };
   //import libs
   import { initializeApp } from "firebase/app";
-  import { getStorage,ref,getDownloadURL,uploadBytesResumable } from "firebase/storage";
+  import { getStorage,ref,getDownloadURL,uploadBytesResumable,deleteObject  } from "firebase/storage";
   // strat connecting to firebase
   initializeApp(firebaseConfig);
   //create object from filebase storage
@@ -99,4 +99,97 @@ router.post("/addimg", fileupload.diskLoader.single("file"), async (req, res) =>
         console.error('Error uploading file:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
+});
+
+router.put("/uppass", async(req,res)=>{
+    let uppass : Uppassword = req.body;
+    let   sql = "update  `user` set `password`=? where `uid`=?";
+        sql = mysql.format(sql , [
+            uppass.password,
+            uppass.uid,
+        ]);
+        conn.query(sql,(err,result)=>{
+            if(err)throw err;
+            res.status(200).json({
+                affected_row : result.affectedRows,
+                success: true
+            });
+        });
+});
+
+router.put("/changeuser", fileupload.diskLoader.single("file"), async (req, res) => {
+    // ตรวจสอบว่ามีการอัปโหลดไฟล์หรือไม่
+    const storage = getStorage();
+    if (!req.file) {
+        // ถ้าไม่มีไฟล์อัปโหลด
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    try {
+        // จัดการกับการอัปโหลดไฟล์ภาพ และข้อมูลผู้ใช้
+        const { name, note , uid ,oldimg} = req.body; // รับข้อมูลจากฟอร์ม
+        if(oldimg){
+            const filePath = decodeURIComponent(oldimg.split('?')[0].split('/o/')[1]);
+            const fileRef = ref(storage, filePath);
+        deleteObject(fileRef).then(() => {
+                    // ลบไฟล์สำเร็จ
+                    console.log('ลบไฟล์สำเร็จ');
+                })
+                .catch((error) => {
+                    // เกิดข้อผิดพลาด
+                    console.error('เกิดข้อผิดพลาดในการลบไฟล์:', error);
+                });
+        }
+        // Convert uid to integer
+        const intUid = parseInt(uid, 10);
+        
+        // Create file name
+        const filename = Math.round(Math.random() * 10000) + ".png";
+        // Set name to be saved on Firebase storage
+        const storageRef = ref(storage, "images/" + filename);
+        // Set details of the file to be uploaded
+        const metadata ={
+            contentType : req.file.mimetype
+        }
+        // Upload to storage
+        const snapshot = await uploadBytesResumable(storageRef, req.file.buffer, metadata);
+        // Get URL image from storage
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        
+        // Insert user data into database
+        let sql = "update `user` set `name`=? ,`note`=? ,`image`=? where `uid`=?";
+        sql = mysql.format(sql, [
+            name,
+            note,
+            downloadUrl,
+            intUid,
+        ]);
+        conn.query(sql, (err, result) => {
+            if (err) {
+                console.error('Error inserting user:', err);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+            return res.status(201).json({ affected_row: result.affectedRows,success: true });
+        });
+    } catch (error) {
+        console.error('Error uploading file:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.put("/upname", async(req,res)=>{
+    let upuser : Upuser = req.body;
+    let   sql = "update  `user` set `name`=? ,`note`=? where `uid`=?";
+        sql = mysql.format(sql , [
+            upuser.name,
+            upuser.note,
+            upuser.uid,
+        ]);
+        conn.query(sql,(err,result)=>{
+            if(err)throw err;
+            res.status(200).json({
+                affected_row : result.affectedRows,
+                success: true
+            });
+        });
 });

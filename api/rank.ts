@@ -45,8 +45,7 @@ router.get("/today", (req, res) => {
     GROUP BY 
         images.imgid, images.imgurl, images.name, images.score, images.uid
     ORDER BY 
-        images.score DESC
-    LIMIT 0, 10; `,
+        images.score DESC `,
     (err, result, fields) => {
       if (result && result.length > 0) {
         // ส่ง response กลับด้วยข้อมูลผู้ใช้
