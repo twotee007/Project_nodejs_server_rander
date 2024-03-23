@@ -34,6 +34,7 @@ const firebaseConfig = {
   //import libs
   import { initializeApp } from "firebase/app";
   import { getStorage,ref,getDownloadURL,uploadBytesResumable,deleteObject  } from "firebase/storage";
+import { ProfileGet } from "../model/profile_get";
   // strat connecting to firebase
   initializeApp(firebaseConfig);
   //create object from filebase storage
@@ -192,4 +193,54 @@ router.put("/upname", async(req,res)=>{
                 success: true
             });
         });
+});
+
+router.delete("/deleteimg/:imgid/:uid", (req, res) => {
+    let imgid = +req.params.imgid;
+    let uid = +req.params.uid;
+    let sql = "DELETE FROM vote WHERE imgid=? AND userid=?";
+    sql = mysql.format(sql, [
+        imgid,
+        uid,
+    ]);
+    conn.query(sql, (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send("Internal Server Error");
+        }
+            sql = "DELETE FROM images WHERE imgid=? AND uid=?";
+            sql = mysql.format(sql, [
+                imgid,
+                uid,
+            ]);
+            conn.query(sql, (err, result) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send("Internal Server Error");
+                }
+                res.status(200).json({
+                    affected_row : result.affectedRows,
+                    success: true
+                });
+            });
+    });
+});
+
+router.put("/Deleteurl", async(req,res)=>{
+    const storage = getStorage();
+    const { imgurl } = req.body; // รับข้อมูลจากฟอร์ม
+    if(imgurl){
+        const filePath = decodeURIComponent(imgurl.split('?')[0].split('/o/')[1]);
+        const fileRef = ref(storage, filePath);
+        deleteObject(fileRef).then(() => {
+            res.status(200).json({
+                success: true
+            });
+                console.log('ลบไฟล์สำเร็จ');
+            })
+            .catch((error) => {
+
+                console.error('เกิดข้อผิดพลาดในการลบไฟล์:', error);
+            });
+    }
 });
