@@ -22,6 +22,23 @@ router.get("/:uid", (req, res) => {
     });
 });
 
+router.get("/seuser/:uid", (req, res) => {
+    let uid = +req.params.uid;
+    const sql ="SELECT * FROM user WHERE uid = ?";
+    conn.query(sql, [uid], (err, result, fields) => {
+            // ตรวจสอบว่ามีผลลัพธ์หรือไม่
+            if (result && result.length > 0) {
+                // ส่ง response กลับด้วยข้อมูลผู้ใช้
+                res.json(result);
+            } else {
+                // ถ้าไม่พบผู้ใช้, ส่ง response กลับเป็น { success: false }
+                res.json({
+                    success: false,
+                });
+            }
+    });
+});
+
 const firebaseConfig = {
     apiKey: "AIzaSyA9QTMwY1-ngMzE18bRVRI08Rq5FTXpSnI",
     authDomain: "catmash-50619.firebaseapp.com",
