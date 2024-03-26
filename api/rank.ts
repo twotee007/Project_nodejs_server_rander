@@ -113,29 +113,29 @@ router.get("/graph/:uid", async (req, res) => {
     if (i === 0) {
       sql = mysql.format(
         `SELECT 
-          images.imgid,
-          images.name,
-          DATE(CURDATE()) AS voteDate,
-          500+SUM(vote.score) as score,
-          images.imgurl
-        FROM vote, images
-        WHERE vote.imgid = images.imgid
-        AND vote.userid = ?
-        GROUP BY imgid, DATE(CURDATE()), images.imgurl, images.name`,
+        images.imgid,
+        images.name,
+        IFNULL(DATE(CURDATE()), 'No data') AS voteDate,
+        IFNULL(500+SUM(vote.score), 500) as score,
+        images.imgurl
+        FROM vote
+        RIGHT JOIN images ON vote.imgid = images.imgid
+        WHERE images.uid = ?
+        GROUP BY images.imgid`,
         [uid]
       );
     } else {
       sql = mysql.format(
         `SELECT 
-          images.imgid,
-          images.name,
-          DATE(DATE_SUB(NOW(), INTERVAL ? DAY)) AS voteDate,
-          500+SUM(CASE WHEN DATE(vateDate) <= CURDATE() - INTERVAL ? DAY THEN vote.score ELSE 0 END) AS score,
-          images.imgurl
-        FROM vote, images
-        WHERE vote.imgid = images.imgid
-        AND vote.userid = ?
-        GROUP BY imgid, DATE(DATE_SUB(NOW(), INTERVAL ? DAY)), images.imgurl, images.name`,
+            images.imgid,
+            images.name,
+            IFNULL(DATE(DATE_SUB(NOW(), INTERVAL ? DAY)), 'No data') AS voteDate,
+            IFNULL(500+SUM(CASE WHEN DATE(vatedate) <= CURDATE() - INTERVAL ? DAY THEN vote.score ELSE 0 END), 500) AS score,
+            images.imgurl
+        FROM vote
+        RIGHT JOIN images ON vote.imgid = images.imgid
+        WHERE images.uid = ?
+        GROUP BY images.imgid, DATE(DATE_SUB(NOW(), INTERVAL ? DAY)), images.imgurl, images.name`,
         [i, i, uid, i]
       );
     }
