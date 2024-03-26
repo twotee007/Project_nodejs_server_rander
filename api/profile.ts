@@ -87,7 +87,8 @@ router.post("/addimg", fileupload.diskLoader.single("file"), async (req, res) =>
         const intUid = parseInt(uid, 10);
         
         // Create file name
-        const filename = Math.round(Math.random() * 10000) + ".png";
+        const uuid = require('uuid');
+        const filename = uuid.v4() + ".png";
         // Set name to be saved on Firebase storage
         const storageRef = ref(storage, "images/" + filename);
         // Set details of the file to be uploaded
@@ -162,7 +163,8 @@ router.put("/changeuser", fileupload.diskLoader.single("file"), async (req, res)
         const intUid = parseInt(uid, 10);
         
         // Create file name
-        const filename = Math.round(Math.random() * 10000) + ".png";
+        const uuid = require('uuid');
+        const filename = uuid.v4() + ".png";
         // Set name to be saved on Firebase storage
         const storageRef = ref(storage, "images/" + filename);
         // Set details of the file to be uploaded
@@ -277,7 +279,8 @@ router.post("/changeimg", fileupload.diskLoader.single("file"), async (req, res)
         const intUid = parseInt(uid, 10);
         const intimgid = parseInt(imgid, 10);
         // Create file name
-        const filename = Math.round(Math.random() * 10000) + ".png";
+        const uuid = require('uuid');
+        const filename = uuid.v4() + ".png";
         // Set name to be saved on Firebase storage
         const storageRef = ref(storage, "images/" + filename);
         // Set details of the file to be uploaded

@@ -49,3 +49,11 @@ router.get("/", (req, res) => {
             });
         });
 });
+
+const bcrypt = require('bcrypt');
+router.get("/hash/:password", async (req, res) => {
+    let password = req.params.password;
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 เป็นค่า saltRounds
+    console.log(hashedPassword);
+    res.json(hashedPassword);
+});
