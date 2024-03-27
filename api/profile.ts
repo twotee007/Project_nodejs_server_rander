@@ -119,12 +119,13 @@ router.post("/addimg", fileupload.diskLoader.single("file"), async (req, res) =>
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
-
+const bcrypt = require('bcrypt');
 router.put("/uppass", async(req,res)=>{
     let uppass : Uppassword = req.body;
+    const hashedPassword = await bcrypt.hash(uppass.password, 10); // 10 เป็นค่า saltRounds
     let   sql = "update  `user` set `password`=? where `uid`=?";
         sql = mysql.format(sql , [
-            uppass.password,
+            hashedPassword,
             uppass.uid,
         ]);
         conn.query(sql,(err,result)=>{

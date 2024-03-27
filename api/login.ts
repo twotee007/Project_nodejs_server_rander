@@ -40,23 +40,38 @@ router.get("/", (req, res) => {
     });
 });
 
-router.get("/:username/:password", (req, res) => {
+const bcrypt = require('bcrypt');
+router.get("/user/:username/:password", (req, res) => {
     let username = req.params.username;
     let password = req.params.password;
-    const sql ="SELECT * FROM user WHERE username = ? AND password = ?";
-    conn.query(sql, [username, password], (err, result, fields) => {
-            // ตรวจสอบว่ามีผลลัพธ์หรือไม่
-            if (result && result.length > 0) {
-                // ส่ง response กลับด้วยข้อมูลผู้ใช้
-                res.json(result);
-            } else {
-                // ถ้าไม่พบผู้ใช้, ส่ง response กลับเป็น { success: false }
-                res.json({
-                    success: false,
-                });
+    const sql = "SELECT * FROM user WHERE username = ?";
+    conn.query(sql, [username], async (err, result, fields) => {
+        if (err) {
+            console.error('Error retrieving user:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        if (result && result.length > 0) {
+            const user = result[0];
+            try {
+                const passwordMatch = await  bcrypt.compare(password, user.password);
+                if (passwordMatch) {
+                    res.json(result);
+                } else {
+                    console.log(err);
+                    res.json({ success: false });
+                }
+            } catch (error) {
+                console.error('Error comparing passwords:', error);
+                return res.status(500).json({ error: 'Internal server error' });
             }
+        } else {
+            console.log(err);
+            
+            res.json({ success: false });
+        }
     });
 });
+
 const firebaseConfig = {
     apiKey: "AIzaSyA9QTMwY1-ngMzE18bRVRI08Rq5FTXpSnI",
     authDomain: "catmash-50619.firebaseapp.com",
@@ -99,7 +114,7 @@ router.post("/signup", fileupload.diskLoader.single("file"), async (req, res) =>
     try {
         // จัดการกับการอัปโหลดไฟล์ภาพ และข้อมูลผู้ใช้
         const { name, username, password, type } = req.body; // รับข้อมูลจากฟอร์ม
-        
+        const hashedPassword = await bcrypt.hash(password, 10); // 10 เป็นค่า saltRounds
         // Create file name
         const uuid = require('uuid');
         const filename = uuid.v4() + ".png";
@@ -119,7 +134,7 @@ router.post("/signup", fileupload.diskLoader.single("file"), async (req, res) =>
         sql = mysql.format(sql, [
             username,
             name,
-            password,
+            hashedPassword,
             type,
             downloadUrl // Use the downloadUrl as the image path
         ]);
