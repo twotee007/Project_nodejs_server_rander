@@ -118,9 +118,9 @@ router.get("/graph/:uid", async (req, res) => {
         IFNULL(DATE(CURDATE()), 'No data') AS voteDate,
         IFNULL(500+SUM(vote.score), 500) as score,
         images.imgurl
-        FROM vote
-        RIGHT JOIN images ON vote.imgid = images.imgid
-        WHERE images.uid = ?
+        FROM vote,images
+        WHERE vote.imgid = images.imgid
+        AND images.uid = ?
         GROUP BY images.imgid`,
         [uid]
       );
@@ -132,10 +132,10 @@ router.get("/graph/:uid", async (req, res) => {
             IFNULL(DATE(DATE_SUB(NOW(), INTERVAL ? DAY)), 'No data') AS voteDate,
             IFNULL(500+SUM(CASE WHEN DATE(vatedate) <= CURDATE() - INTERVAL ? DAY THEN vote.score ELSE 0 END), 500) AS score,
             images.imgurl
-        FROM vote
-        RIGHT JOIN images ON vote.imgid = images.imgid
-        WHERE images.uid = ?
-        GROUP BY images.imgid, DATE(DATE_SUB(NOW(), INTERVAL ? DAY)), images.imgurl, images.name`,
+            FROM vote,images
+            WHERE vote.imgid = images.imgid
+            AND images.uid = ?
+            GROUP BY images.imgid, DATE(DATE_SUB(NOW(), INTERVAL ? DAY)), images.imgurl, images.name`,
         [i, i, uid, i]
       );
     }
