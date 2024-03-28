@@ -20,25 +20,23 @@ router.get("/", (req, res) => {
   router.put("/update/:imgid", async(req,res)=>{
     //1. Receive data from requrst
     const imgid = +req.params.imgid;
-    let img : UpDateImg = req.body;
+    let updateimg : UpDateImg = req.body;
 
     //2.Query og data by  id
     let imgOriginal : UpDateImg | undefined;
-    let sql = mysql.format("select * from images where imgid = ?",[imgid])
+    let sql = mysql.format("select score from images where imgid = ?",[imgid])
     let result = await queryAsync(sql);
     const jsonStr =  JSON.stringify(result);
     const jsonobj = JSON.parse(jsonStr);
     const rowData = jsonobj;
     imgOriginal = rowData[0];
-    //3.Merge recieved object to og
-    const updateimg = {...imgOriginal,...img};
-    //4.updata data in table
-         sql = "update  `images` set `imgurl`=?, `name`=?, `score`=?, `uid`=? where `imgid`=?";
+    if (!imgOriginal) {
+        return res.status(404).json({ message: "Image not found" });
+    }
+    let scoreimg = updateimg.score + imgOriginal.score;
+         sql = "update  `images` set `score`=? where `imgid`=?";
         sql = mysql.format(sql , [
-            updateimg.imgurl,
-            updateimg.name,
-            updateimg.score,
-            updateimg.uid,
+            scoreimg,
             imgid
         ]);
         //5.Send Query for updata
