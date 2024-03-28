@@ -4,7 +4,10 @@ import { UpDateImg } from "../model/updateimg";
 export const router = express.Router();
 
 router.get("/", (req, res) => {
-    conn.query('select * from images', (err, result, fields)=>{
+    conn.query(`select images.imgid,images.imgurl,images.name as nameimg,images.score,images.uid,user.name as nameuser
+                from images,user
+                WHERE images.uid = user.uid`,
+        (err, result, fields)=>{
         if (result && result.length > 0) {
             // ส่ง response กลับด้วยข้อมูลผู้ใช้
             res.json(result);
