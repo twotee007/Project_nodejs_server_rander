@@ -18,6 +18,8 @@ router.get("/", (req, res) => {
             });
         }
     });
+
+    
   });
 
   router.put("/update/:imgid", async(req,res)=>{
